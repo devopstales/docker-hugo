@@ -1,15 +1,18 @@
+cnf ?= config.env
+include $(cnf)
+export $(shell sed 's/=.*//' $(cnf))
+
 .PHONY:	all
-all:	latest wheezy
+all:	latest version
 
-.PHONY:	latest
-latest:	Dockerfile
-	docker build -t hugo:latest .
+.DEFAULT_GOAL := all
 
-.PHONY:	wheezy
-wheezy:	0.20-wheezy/Dockerfile
-	docker build -t hugo:020.wheezy 0.20-wheezy/
+latest:
+	docker build --build-arg HUGO_VERSION=$(HUGO_VERSION) -t devopstales/hugo:latest .
 
+version:
+	docker build --build-arg HUGO_VERSION=$(HUGO_VERSION) -t devopstales/hugo:$(HUGO_VERSION) .
 
-
-0.20-wheezy/Dockerfile:	Dockerfile
-	sed -e 's/jessie/wheezy/' $< > $@
+push:
+	docker push devopstales/hugo:latest
+	docker push devopstales/hugo:$(HUGO_VERSION)
